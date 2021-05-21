@@ -116,8 +116,13 @@ public class HashTableChain<K, V> implements Map<K, V>  {
         @Override
         public Map.Entry<K, V> next() {
         	// FILL HERE
+        	int currentIndex = 0;
+        	Entry<K,V> currentNode;
+        	LinkedList<Entry<K,V>> currentList;
         	if(this.hasNext()) {
-        	
+        		while(currentIndex < index) {
+        			
+        		}
         	}
 			return lastItemReturned;
         }
@@ -125,6 +130,7 @@ public class HashTableChain<K, V> implements Map<K, V>  {
         @Override
         public void remove() {
         	// FILL HERE
+        	throw new UnsupportedOperationException();
         }
     }
 
@@ -310,6 +316,7 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     public Set<K> keySet() {
     	// FILL HERE
     	
+    	
     }
 
     // throws UnsupportedOperationException
@@ -353,9 +360,14 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     	}
     	return true;
     }
+    
+    /*
+     *  FIX METHOD
+     *  vvvvvvvvvvv
+     */
     @Override
     public int hashCode() {
-    	//FILL HERE
+    	
     	String number = "one";
     	return number.hashCode() + 1;
     }
