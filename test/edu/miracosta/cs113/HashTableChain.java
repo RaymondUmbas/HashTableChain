@@ -65,7 +65,9 @@ public class HashTableChain<K, V> implements Map<K, V>  {
             return  key + "=" + value  ;
         }
 
-
+        public int hash() {
+        	return key.hashCode();
+        }
 
     }
 
@@ -107,11 +109,17 @@ public class HashTableChain<K, V> implements Map<K, V>  {
         @Override
         public boolean hasNext() {
         	// FILL HERE
+        	return index < (numKeys - 1);
+        	
         }
 
         @Override
         public Map.Entry<K, V> next() {
         	// FILL HERE
+        	if(this.hasNext()) {
+        	
+        	}
+			return lastItemReturned;
         }
 
         @Override
@@ -133,24 +141,62 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     @Override
     public int size() {
         // FILL HERE
+    	return numKeys; 
     }
 
     // returns boolean if table has no keys
     @Override
     public boolean isEmpty() {
     	// FILL HERE
+    	return numKeys == 0;
     }
 
     // returns boolean if table has the searched for key
     @Override
     public boolean containsKey(Object key) {
-    	// Fill Here
+    	
+    	
+    	Entry<K,V> currentNode;
+    	LinkedList<Entry<K,V>> currentList;
+    	int index = key.hashCode() % table.length;
+    	
+    	currentList = table[index];
+    	if(currentList == null) {
+    		return false;
+    	}
+    	
+    	for(int i = 0; i < currentList.size(); i++) {
+    		currentNode = currentList.get(i);
+    		if(key.equals(currentNode.getKey())) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
     }
 
     // returns boolean if table has the searched for value
     @Override
     public boolean containsValue(Object value) {
-    	// FILL HERE
+
+    	LinkedList<Entry<K, V>> currentList;
+    	Entry<K,V> currentNode;
+    	
+    	
+    	//For each LL in Array 
+    	for(int i = 0; i < table.length; i++) {
+    		//For each node in LL
+    		currentList = table[i];
+    		if(currentList != null) {
+	    		for(int j = 0; j < currentList.size(); j++) {
+	    			currentNode = currentList.get(j);
+	    			if(currentNode.getValue() == value) {
+	    				return true;
+	    			}
+	    		}
+    		}
+    	}
+    	return false;
     	
     }
 
@@ -158,12 +204,40 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     @Override
     public V get(Object key) {
     	// FILL HERE
+    	int index = key.hashCode() % table.length;
+    	 if (index < 0)
+    	 index += table.length;
+    	 if (table[index] == null)
+    	 return null; // key is not in the table.
+    	 // Search the list at table[index] to find the key.
+    	 for (Entry<K, V> nextItem : table[index]) {
+    	 if (nextItem.getKey().equals(key))
+    	 return nextItem.getValue();
+    	 }
+    	 // assert: key is not in the table.
+    	 return null;
     }
 
     // adds the key and value pair to the table using hashing
     @Override
     public V put(K key, V value) {
-    	// FILL HERE
+    	if(this.containsKey(key)) {
+    		return null;
+    	}
+    	Entry<K,V> newNode = new Entry<K,V>(key,value);
+    	int newHash = key.hashCode();
+    	int newIndex = newHash % table.length; 
+    	
+    	//First Value at Index
+    	if(table[newIndex] == null) {
+    		//Make new LL
+    		table[newIndex] = new LinkedList<Entry<K,V>>();
+    	}
+    	//Put new entry
+    	table[newIndex].add(newNode);
+    	numKeys++;
+    	return value;
+    	
     }
 
 
@@ -193,7 +267,28 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     // return removed value
     @Override
     public V remove(Object key) {
-    	// FILL HERE
+    	
+    	LinkedList<Entry<K, V>> currentList;
+    	V removedValue;
+    	Entry<K,V> currentNode;
+    	//For each LL in Array 
+    	for(int i = 0; i < table.length; i++) {
+    		//For each node in LL
+    		currentList = table[i];
+    		if(currentList != null) {
+	    		for(int j = 0; j < currentList.size(); j++) {
+	    			currentNode = currentList.get(j);
+	    			if(currentNode.getKey().equals(key)) {
+	    				removedValue = currentNode.getValue();
+	    				currentList.remove(j);
+	    				return removedValue; 
+	    			}
+	    		}
+    		}
+    	}
+    	
+    	//No value found
+    	return null;
     }
 
     // throws UnsupportedOperationException
@@ -206,12 +301,15 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     @Override
     public void clear() {
     	// Fill HERE
+    	table = new LinkedList[table.length];
+    	numKeys = 0;
     }
 
     // returns a view of the keys in set view
     @Override
     public Set<K> keySet() {
     	// FILL HERE
+    	
     }
 
     // throws UnsupportedOperationException
@@ -225,19 +323,40 @@ public class HashTableChain<K, V> implements Map<K, V>  {
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
     	// FILL HERE
-
-
+    	return new EntrySet();
+		
     }
 
     @Override
     public boolean equals(Object o) {
     	// FILL HERE
-
+    	Map<String, Integer> other = (Map<String, Integer>) o;
+    	LinkedList<Entry<K,V>> currentList;
+    	Entry<K,V> currentNode, otherNode;
+    	V currentValue, otherValue;
+    	K currentKey;
+    	
+    	for(int i = 0; i < table.length; i++) {
+    		currentList = table[i];
+    		if(currentList != null) {
+	    		for(int j = 0; j < currentList.size(); j++) {
+	    			 currentNode = currentList.get(j);
+	    			 currentKey = currentNode.getKey();
+	    			 currentValue = currentNode.getValue();
+	    			 otherValue = (V) other.get(currentKey);
+	    			 if(otherValue != currentValue) {
+	    				 return false;
+	    			 }
+	    		}
+    		}
+    		
+    	}
+    	return true;
     }
-
     @Override
     public int hashCode() {
     	//FILL HERE
-
+    	String number = "one";
+    	return number.hashCode() + 1;
     }
 }
